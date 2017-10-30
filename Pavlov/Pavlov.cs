@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Media;
 using System.Security.Principal;
 using System.Windows.Forms;
 
@@ -11,6 +12,9 @@ namespace Pavlov
         private DateTime dt;
         private int foodPrev = -1;
         private int changeRate = -1;
+        private bool alarmPlayed = false;
+        private bool repeatAlarm = true;
+        private SoundPlayer player;
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
@@ -39,14 +43,24 @@ namespace Pavlov
             }
         }
 
-
         public Pavlov()
         {
             InitializeComponent();
             BackColor = Color.Pink;
             TransparencyKey = Color.Pink;
+
+            try
+            {
+                player = new SoundPlayer(@"feedme.wav");
+            }
+            catch 
+            {
+                player = null;
+            }
+
             memRead = new MemRead();
             memRead.GetProcess();
+
             var Timer = new Timer()
             {
                 Interval = (500)
@@ -74,6 +88,7 @@ namespace Pavlov
                     bestFeedLabel.Text = string.Empty;
                     changeRate = -1;
                     foodPrev = -1;
+                    if (alarmPlayed) StopAlarm();
                     petNameLabel.Text = "No Pet Active.";
                 }
             }
@@ -82,6 +97,7 @@ namespace Pavlov
                 hungerLabel.Text = string.Empty;
                 intimacyLabel.Text = string.Empty;
                 bestFeedLabel.Text = string.Empty;
+                if (alarmPlayed) StopAlarm();
                 petNameLabel.Text = "Unable to find data.";
             }
         }
@@ -90,9 +106,14 @@ namespace Pavlov
         {
             if (foodPrev == -1) foodPrev = food;
             var change = foodPrev - food;
-            if (food > 0 && changeRate == -1 && foodPrev != food) changeRate = change;
+            if (food > 0 && changeRate == -1 && foodPrev > food) changeRate = change;
             foodPrev = food;
-            if (food <= 25) return "Feed me!";
+            if (food <= 25)
+            {
+                if (!alarmPlayed) PlayAlarm();
+                return "Feed me!";
+            }
+            if (alarmPlayed) StopAlarm();
             if (changeRate != -1)
             {
                 if (change != 0)
@@ -104,6 +125,30 @@ namespace Pavlov
                 return $"Feed in about {ts.Minutes.ToString().PadLeft(2, '0')}:{ts.Seconds.ToString().PadLeft(2, '0')}";
             }
             return "Calculating...";
+        }
+
+        private void StopAlarm()
+        {
+            alarmPlayed = false;
+            if (player != null && repeatAlarm)
+            {
+                player.Stop();
+            }
+        }
+
+        private void PlayAlarm()
+        {
+            alarmPlayed = true;
+            if (player != null) {
+                if (repeatAlarm)
+                {
+                    player.PlayLooping();
+                }
+                else
+                {
+                    player.Play();
+                }
+            } 
         }
 
         private string GetHungerString(int food)
@@ -142,6 +187,7 @@ namespace Pavlov
             dt = DateTime.Now;
             changeRate = -1;
             foodPrev = -1;
+            if (alarmPlayed) StopAlarm();
             memRead.GetProcess();
         }
         #endregion
