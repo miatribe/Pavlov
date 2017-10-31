@@ -165,10 +165,10 @@ namespace Pavlov
 
         private string GetIntimacyString(int intimacy)
         {
-            if (intimacy >= 910) return "Loyal";
-            if (intimacy >= 750) return "Cordial";
-            if (intimacy >= 250) return "Neutral";
-            if (intimacy >= 100) return "Shy";
+            if (intimacy > 910) return "Loyal";
+            if (intimacy > 750) return "Cordial";
+            if (intimacy > 250) return "Neutral";
+            if (intimacy > 100) return "Shy";
             return "Awkward";
         }
 
