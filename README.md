@@ -1,10 +1,14 @@
 # Pavlov
 Pet Info trakcer for iRO:Odin (Restart)
 
+[Download link](https://github.com/miatribe/Pavlov/releases/download/0.1/Pavlov.zip)
+
 #### Must be ran as admin.
 
 Arrow at bottom right can be used to cycle between RO clients
 
+![preview](https://raw.githubusercontent.com/miatribe/pavlov/master/PavlovPreview.png)
+
 ### future upgrades
 * Add current character name.
-* Play a sound when food drops below 26
+* Make a toggle to have alarm repeat (current) or just play once.
