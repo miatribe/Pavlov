@@ -13,6 +13,8 @@ namespace Pavlov
         private int foodPrev = -1;
         private int changeRate = -1;
         private bool alarmPlayed = false;
+
+        //TODO bool is a placeholder for a toggle/switch of some sort
         private bool repeatAlarm = true;
         private SoundPlayer player;
 
@@ -74,7 +76,7 @@ namespace Pavlov
             var gi = memRead.GetValues();
             if (gi != null)
             {
-                if (gi.PetId != uint.MaxValue)
+                if (gi.PetId != uint.MaxValue && gi.PetId != 0)
                 {
                     hungerLabel.Text = $"Hunger:{GetHungerString(gi.Food)} ({gi.Food}/100)";
                     intimacyLabel.Text = $"Intimacy:{GetIntimacyString(gi.Intimacy)} ({gi.Intimacy}/1000)";
@@ -97,13 +99,14 @@ namespace Pavlov
                 hungerLabel.Text = string.Empty;
                 intimacyLabel.Text = string.Empty;
                 bestFeedLabel.Text = string.Empty;
-                if (alarmPlayed) StopAlarm();
+                StopAlarm();
                 petNameLabel.Text = "Unable to find data.";
             }
         }
 
         private string GetEstimatedTimeTillHungry(int food)
         {
+            //TODO Fix all this
             if (foodPrev == -1) foodPrev = food;
             var change = foodPrev - food;
             if (food > 0 && changeRate == -1 && foodPrev > food) changeRate = change;
