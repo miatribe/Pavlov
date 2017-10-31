@@ -1,5 +1,5 @@
 # Pavlov
-Pet Info trakcer for iRO:Odin (Restart)
+Pet Info tracker for iRO:Odin (Restart)
 
 [Download link](https://github.com/miatribe/Pavlov/releases/download/0.1/Pavlov.zip)
 
