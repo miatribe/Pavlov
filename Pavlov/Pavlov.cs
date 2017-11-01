@@ -55,7 +55,7 @@ namespace Pavlov
             {
                 player = new SoundPlayer(@"feedme.wav");
             }
-            catch 
+            catch
             {
                 player = null;
             }
@@ -80,7 +80,7 @@ namespace Pavlov
                 {
                     hungerLabel.Text = $"Hunger:{GetHungerString(gi.Food)} ({gi.Food}/100)";
                     intimacyLabel.Text = $"Intimacy:{GetIntimacyString(gi.Intimacy)} ({gi.Intimacy}/1000)";
-                    petNameLabel.Text = gi.PetName;
+                    petNameLabel.Text = $"{gi.CharName} : {gi.PetName}";
                     bestFeedLabel.Text = GetEstimatedTimeTillHungry(gi.Food);
                 }
                 else
@@ -90,8 +90,8 @@ namespace Pavlov
                     bestFeedLabel.Text = string.Empty;
                     changeRate = -1;
                     foodPrev = -1;
+                    petNameLabel.Text = gi.CharName != "" ? $"{gi.CharName} : No Pet." : "Unknown : No Pet.";
                     if (alarmPlayed) StopAlarm();
-                    petNameLabel.Text = "No Pet Active.";
                 }
             }
             else
@@ -106,7 +106,6 @@ namespace Pavlov
 
         private string GetEstimatedTimeTillHungry(int food)
         {
-            //TODO Fix all this
             if (foodPrev == -1) foodPrev = food;
             var change = foodPrev - food;
             if (food > 0 && changeRate == -1 && foodPrev > food) changeRate = change;
@@ -125,7 +124,9 @@ namespace Pavlov
                     dt = DateTime.Now.AddMinutes(x);
                 }
                 var ts = dt - DateTime.Now;
-                return $"Feed in about {ts.Minutes.ToString().PadLeft(2, '0')}:{ts.Seconds.ToString().PadLeft(2, '0')}";
+                if (ts >= new TimeSpan()) return $"Feed in about {ts.Minutes.ToString().PadLeft(2, '0')}:{ts.Seconds.ToString().PadLeft(2, '0')}";
+                return "Feed very soon.";
+
             }
             return "Calculating...";
         }
@@ -142,7 +143,8 @@ namespace Pavlov
         private void PlayAlarm()
         {
             alarmPlayed = true;
-            if (player != null) {
+            if (player != null)
+            {
                 if (repeatAlarm)
                 {
                     player.PlayLooping();
@@ -151,7 +153,7 @@ namespace Pavlov
                 {
                     player.Play();
                 }
-            } 
+            }
         }
 
         private string GetHungerString(int food)

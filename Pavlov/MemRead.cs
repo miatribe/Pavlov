@@ -16,6 +16,7 @@ namespace Pavlov
         private IntPtr foodAddress;
         private IntPtr nameAddress;
         private IntPtr idAddress;
+        private IntPtr charNameAddress;
 
         public void GetProcess()
         {
@@ -34,6 +35,7 @@ namespace Pavlov
             {
                 SigScan sigScan = new SigScan { Process = curProcess, DumpSize = 0x5B8D80 };
                 intimacyAddress = sigScan.FindAddress(new byte[] { 0x8B, 0x43, 0x07, 0xA3, 0x00, 0x00, 0x00, 0x00, 0x85, 0xFF }, "xxxx????xx", 4);
+                charNameAddress = sigScan.FindAddress(new byte[] { 0x0F, 0xB6, 0x84, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x30, 0x81 }, "xxxx????xx", 4);
                 foodAddress = intimacyAddress - 0x4;
                 nameAddress = intimacyAddress - 0x30;
                 idAddress = intimacyAddress - 0xC;
@@ -49,7 +51,8 @@ namespace Pavlov
                     PetName = ReadString(curProcess.Handle, nameAddress),
                     Food = ReadInt(curProcess.Handle, foodAddress),
                     Intimacy = ReadInt(curProcess.Handle, intimacyAddress),
-                    PetId = ReadUInt(curProcess.Handle, idAddress)
+                    PetId = ReadUInt(curProcess.Handle, idAddress),
+                    CharName = ReadString(curProcess.Handle, charNameAddress)
                 };
             }
             catch

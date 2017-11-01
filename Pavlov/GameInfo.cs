@@ -6,5 +6,6 @@
         public int Food { get; set; }
         public int Intimacy { get; set; }
         public uint PetId { get; set; }
+        public string CharName { get; set; }
     }
 }
