@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Media;
 using System.Security.Principal;
@@ -48,9 +49,9 @@ namespace Pavlov
         public Pavlov()
         {
             InitializeComponent();
+            CreateContextMenu();
             BackColor = Color.Pink;
             TransparencyKey = Color.Pink;
-
             try
             {
                 player = new SoundPlayer(@"feedme.wav");
@@ -59,16 +60,30 @@ namespace Pavlov
             {
                 player = null;
             }
-
             memRead = new MemRead();
             memRead.GetProcess();
-
             var Timer = new Timer()
             {
                 Interval = (500)
             };
             Timer.Tick += new EventHandler(UpdateWindow);
             Timer.Start();
+        }
+
+        private void CreateContextMenu()
+        {
+            var contextMenu = new ContextMenu(new[]
+            {
+                    new MenuItem("Exit Pavlov", ExitBtn_Click),
+                    //new MenuItem("Something else", menuItem1_Click)
+                });
+            var notifyIcon = new NotifyIcon(components = new Container())
+            {
+                Icon = Properties.Resources.icon,
+                ContextMenu = contextMenu,
+                Text = "Pavlov",
+                Visible = true
+            };
         }
 
         private void UpdateWindow(object sender, EventArgs e)
