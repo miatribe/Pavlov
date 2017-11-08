@@ -153,6 +153,7 @@
             this.RightToLeftLayout = true;
             this.Text = "Pavlov";
             this.TopMost = true;
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Pavlov_FormClosing);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Window_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ExitBtn)).EndInit();

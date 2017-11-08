@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Media;
@@ -23,7 +24,6 @@ namespace Pavlov
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
-
 
         [STAThread]
         static void Main()
@@ -50,6 +50,8 @@ namespace Pavlov
         {
             InitializeComponent();
             CreateContextMenu();
+            StartPosition = FormStartPosition.Manual;
+            SetWindowPos();
             BackColor = Color.Pink;
             TransparencyKey = Color.Pink;
             try
@@ -72,18 +74,52 @@ namespace Pavlov
 
         private void CreateContextMenu()
         {
-            var contextMenu = new ContextMenu(new[]
-            {
-                    new MenuItem("Exit Pavlov", ExitBtn_Click),
-                    //new MenuItem("Something else", menuItem1_Click)
-                });
             var notifyIcon = new NotifyIcon(components = new Container())
             {
                 Icon = Properties.Resources.icon,
-                ContextMenu = contextMenu,
+                ContextMenu = new ContextMenu(new[]
+                {
+                    new MenuItem("Reset Window Position", ResetWindowPos),
+                    new MenuItem("-"),
+                    new MenuItem("Exit Pavlov", ExitBtn_Click)
+                }),
                 Text = "Pavlov",
                 Visible = true
             };
+        }
+
+        private void SetWindowPos()
+        {
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    Location = new Point((int)key?.GetValue("winX"), (int)key?.GetValue("winY"));
+                }
+                catch (Exception)
+                {
+                    Location = new Point(10, 10);
+                }
+            }
+        }
+
+        private void ResetWindowPos(object sender, EventArgs e)
+        {
+            SaveWindowPos(10, 10);
+            SetWindowPos();
+        }
+
+        private void SaveWindowPos(int winX, int winY)
+        {
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    key?.SetValue("winX", winX);
+                    key?.SetValue("winY", winY);
+                }
+                catch {/* If we cant write to the registry do nothing*/}
+            }
         }
 
         private void UpdateWindow(object sender, EventArgs e)
@@ -210,6 +246,12 @@ namespace Pavlov
             if (alarmPlayed) StopAlarm();
             memRead.GetProcess();
         }
+        private void Pavlov_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveWindowPos(Location.X, Location.Y);
+        }
         #endregion
+
+
     }
 }
