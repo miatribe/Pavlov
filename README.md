@@ -1,7 +1,7 @@
 # Pavlov
 Pet Info tracker for iRO:Odin (Restart)
 
-[Download link](https://github.com/miatribe/Pavlov/releases/download/0.1/Pavlov.zip)
+[Download link](https://github.com/miatribe/Pavlov/releases/download/0.2/Pavlov.zip)
 
 #### Must be ran as admin.
 
