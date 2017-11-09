@@ -7,7 +7,7 @@ Pet Info tracker for iRO:Odin (Restart)
 
 Arrow at bottom right can be used to cycle between RO clients
 
-![preview](https://raw.githubusercontent.com/miatribe/pavlov/master/PavlovPreview.png)
+![preview](https://raw.githubusercontent.com/miatribe/pavlov/master/PavlovPreview2.png)
 
 ### future upgrades
 * Add current character name.
