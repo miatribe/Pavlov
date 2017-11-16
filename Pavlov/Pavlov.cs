@@ -15,9 +15,8 @@ namespace Pavlov
         private int foodPrev = -1;
         private int changeRate = -1;
         private bool alarmPlayed = false;
-
-        //TODO bool is a placeholder for a toggle/switch of some sort
-        private bool repeatAlarm = true;
+        private MenuItem alarmToggle;
+        private bool repeatAlarm;
         private SoundPlayer player;
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
@@ -49,6 +48,7 @@ namespace Pavlov
         public Pavlov()
         {
             InitializeComponent();
+            repeatAlarm = GetAlarmRepeatBool();
             CreateContextMenu();
             StartPosition = FormStartPosition.Manual;
             SetWindowPos();
@@ -80,12 +80,39 @@ namespace Pavlov
                 ContextMenu = new ContextMenu(new[]
                 {
                     new MenuItem("Reset Window Position", ResetWindowPos),
+                    alarmToggle = new MenuItem($"Toggle Alarm Type (Current:{(GetAlarmRepeatBool()? "Repeat" : "Single")})", ToggleAlarmType),
                     new MenuItem("-"),
                     new MenuItem("Exit Pavlov", ExitBtn_Click)
                 }),
                 Text = "Pavlov",
                 Visible = true
             };
+        }
+
+        private void ToggleAlarmType(object sender, EventArgs e)
+        {
+            repeatAlarm = !repeatAlarm;
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    key?.SetValue("alarmRepeat", repeatAlarm);
+                }
+                catch {/* If we cant write to the registry do nothing*/}
+            }
+            alarmToggle.Text = $"Toggle Alarm Type (Current:{(repeatAlarm ? "Repeat" : "Single")})";
+        }
+
+        private bool GetAlarmRepeatBool()
+        {
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    return Convert.ToBoolean(key?.GetValue("alarmRepeat"));
+                }
+                catch { return true; }
+            }
         }
 
         private void SetWindowPos()
