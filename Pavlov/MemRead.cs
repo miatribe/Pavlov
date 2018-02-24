@@ -12,10 +12,14 @@ namespace Pavlov
 
         private int processNum;
         private Process curProcess;
-        private IntPtr intimacyAddress;
-        private IntPtr foodAddress;
-        private IntPtr nameAddress;
-        private IntPtr idAddress;
+        private IntPtr petIntimacyAddress;
+        private IntPtr petFoodAddress;
+        private IntPtr petNameAddress;
+        private IntPtr petIdAddress;
+        private IntPtr homonIntimacyAddress;
+        private IntPtr homonFoodAddress;
+        private IntPtr homonNameAddress;
+        private IntPtr homonIdAddress;
         private IntPtr charNameAddress;
 
         public void GetProcess()
@@ -34,24 +38,48 @@ namespace Pavlov
             if (curProcess != null)
             {
                 SigScan sigScan = new SigScan { Process = curProcess, DumpSize = 0x5B8D80 };
-                intimacyAddress = sigScan.FindAddress(new byte[] { 0x8B, 0x43, 0x07, 0xA3, 0x00, 0x00, 0x00, 0x00, 0x85, 0xFF }, "xxxx????xx", 4);
+                petIntimacyAddress = sigScan.FindAddress(new byte[] { 0x8B, 0x43, 0x07, 0xA3, 0x00, 0x00, 0x00, 0x00, 0x85, 0xFF }, "xxxx????xx", 4);
                 charNameAddress = sigScan.FindAddress(new byte[] { 0x0F, 0xB6, 0x84, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x30, 0x81 }, "xxxx????xx", 4);
-                foodAddress = intimacyAddress - 0x4;
-                nameAddress = intimacyAddress - 0x30;
-                idAddress = intimacyAddress - 0xC;
+                petFoodAddress = petIntimacyAddress - 0x4;
+                petNameAddress = petIntimacyAddress - 0x30;
+                petIdAddress = petIntimacyAddress - 0xC;
+                IntPtr homonAtk = sigScan.FindAddress(new byte[] { 0x23, 0xA3, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xBF, 0x46, 0x25 }, "xx????xxxx", 2);
+                homonNameAddress = homonAtk - 0x20;
+                homonFoodAddress = homonAtk + 0x48;
+                homonIntimacyAddress = homonAtk + 0x38;
+                homonIdAddress = homonAtk + 0x6C;
             }
         }
 
-        public GameInfo GetValues()
+        public GameInfo GetPetValues()
         {
             try
             {
                 return new GameInfo
                 {
-                    PetName = ReadString(curProcess.Handle, nameAddress),
-                    Food = ReadInt(curProcess.Handle, foodAddress),
-                    Intimacy = ReadInt(curProcess.Handle, intimacyAddress),
-                    PetId = ReadUInt(curProcess.Handle, idAddress),
+                    Name = ReadString(curProcess.Handle, petNameAddress),
+                    Food = ReadInt(curProcess.Handle, petFoodAddress),
+                    Intimacy = ReadInt(curProcess.Handle, petIntimacyAddress),
+                    Id = ReadUInt(curProcess.Handle, petIdAddress),
+                    CharName = ReadString(curProcess.Handle, charNameAddress)
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public GameInfo GetHomonValues()
+        {
+            try
+            {
+                return new GameInfo
+                {
+                    Name = ReadString(curProcess.Handle, homonNameAddress),
+                    Food = ReadInt(curProcess.Handle, homonFoodAddress),
+                    Intimacy = ReadInt(curProcess.Handle, homonIntimacyAddress),
+                    Id = ReadUInt(curProcess.Handle, homonIdAddress),
                     CharName = ReadString(curProcess.Handle, charNameAddress)
                 };
             }

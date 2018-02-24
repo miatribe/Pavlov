@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Pavlov));
-            this.petNameLabel = new System.Windows.Forms.Label();
+            this.NameLabel = new System.Windows.Forms.Label();
             this.bestFeedLabel = new System.Windows.Forms.Label();
             this.intimacyLabel = new System.Windows.Forms.Label();
             this.hungerLabel = new System.Windows.Forms.Label();
@@ -44,13 +44,13 @@
             // 
             // petNameLabel
             // 
-            this.petNameLabel.AutoSize = true;
-            this.petNameLabel.BackColor = System.Drawing.Color.Transparent;
-            this.petNameLabel.Location = new System.Drawing.Point(1, 83);
-            this.petNameLabel.Name = "petNameLabel";
-            this.petNameLabel.Size = new System.Drawing.Size(0, 13);
-            this.petNameLabel.TabIndex = 4;
-            this.petNameLabel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Window_MouseDown);
+            this.NameLabel.AutoSize = true;
+            this.NameLabel.BackColor = System.Drawing.Color.Transparent;
+            this.NameLabel.Location = new System.Drawing.Point(1, 83);
+            this.NameLabel.Name = "petNameLabel";
+            this.NameLabel.Size = new System.Drawing.Size(0, 13);
+            this.NameLabel.TabIndex = 4;
+            this.NameLabel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Window_MouseDown);
             // 
             // bestFeedLabel
             // 
@@ -145,7 +145,7 @@
             this.Controls.Add(this.hungerLabel);
             this.Controls.Add(this.intimacyLabel);
             this.Controls.Add(this.bestFeedLabel);
-            this.Controls.Add(this.petNameLabel);
+            this.Controls.Add(this.NameLabel);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -164,7 +164,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Label petNameLabel;
+        private System.Windows.Forms.Label NameLabel;
         private System.Windows.Forms.Label bestFeedLabel;
         private System.Windows.Forms.Label intimacyLabel;
         private System.Windows.Forms.Label hungerLabel;

@@ -16,8 +16,11 @@ namespace Pavlov
         private int changeRate = -1;
         private bool alarmPlayed = false;
         private MenuItem alarmToggle;
+        private MenuItem trackingToggle;
         private bool repeatAlarm;
         private SoundPlayer player;
+        //if false = trackingHomon
+        private bool trackingPet;
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
@@ -49,6 +52,7 @@ namespace Pavlov
         {
             InitializeComponent();
             repeatAlarm = GetAlarmRepeatBool();
+            trackingPet = GetTrackingBool();
             CreateContextMenu();
             StartPosition = FormStartPosition.Manual;
             SetWindowPos();
@@ -81,6 +85,7 @@ namespace Pavlov
                 {
                     new MenuItem("Reset Window Position", ResetWindowPos),
                     alarmToggle = new MenuItem($"Toggle Alarm Type (Current:{(GetAlarmRepeatBool()? "Repeat" : "Single")})", ToggleAlarmType),
+                    trackingToggle = new MenuItem($"Toggle Tracking Type (Current:{(GetTrackingBool()? "Pet" : "Homunculus")})", ToggleTackingType),
                     new MenuItem("-"),
                     new MenuItem("Exit Pavlov", ExitBtn_Click)
                 }),
@@ -110,6 +115,32 @@ namespace Pavlov
                 try
                 {
                     return Convert.ToBoolean(key?.GetValue("alarmRepeat"));
+                }
+                catch { return true; }
+            }
+        }
+
+        private void ToggleTackingType(object sender, EventArgs e)
+        {
+            trackingPet = !trackingPet;
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    key?.SetValue("trackPet", trackingPet);
+                }
+                catch {/* If we cant write to the registry do nothing*/}
+            }
+            trackingToggle.Text = $"Toggle Tracking Type (Current:{(GetTrackingBool() ? "Pet" : "Homunculus")})";
+        }
+
+        private bool GetTrackingBool()
+        {
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    return Convert.ToBoolean(key?.GetValue("trackPet"));
                 }
                 catch { return true; }
             }
@@ -151,24 +182,25 @@ namespace Pavlov
 
         private void UpdateWindow(object sender, EventArgs e)
         {
-            var gi = memRead.GetValues();
+            var gi = trackingPet ? memRead.GetPetValues() : memRead.GetHomonValues();
             if (gi != null)
             {
-                if (gi.PetId != uint.MaxValue && gi.PetId != 0)
+                if (gi.Id != uint.MaxValue && gi.Id != 0)
                 {
                     hungerLabel.Text = $"Hunger:{GetHungerString(gi.Food)} ({gi.Food}/100)";
                     intimacyLabel.Text = $"Intimacy:{GetIntimacyString(gi.Intimacy)} ({gi.Intimacy}/1000)";
-                    petNameLabel.Text = $"{gi.CharName} : {gi.PetName}";
+                    NameLabel.Text = $"{gi.CharName} : {gi.Name}";
                     bestFeedLabel.Text = GetEstimatedTimeTillHungry(gi.Food);
                 }
                 else
                 {
+                    var petHomonText = trackingPet ? "Pet" : "Homunculus";
                     hungerLabel.Text = string.Empty;
                     intimacyLabel.Text = string.Empty;
                     bestFeedLabel.Text = string.Empty;
                     changeRate = -1;
                     foodPrev = -1;
-                    petNameLabel.Text = gi.CharName != "" ? $"{gi.CharName} : No Pet." : "Unknown : No Pet.";
+                    NameLabel.Text = gi.CharName != "" ? $"{gi.CharName} : No {petHomonText}." : $"Unknown : No {petHomonText}.";
                     if (alarmPlayed) StopAlarm();
                 }
             }
@@ -178,7 +210,7 @@ namespace Pavlov
                 intimacyLabel.Text = string.Empty;
                 bestFeedLabel.Text = string.Empty;
                 StopAlarm();
-                petNameLabel.Text = "Unable to find data.";
+                NameLabel.Text = "Unable to find data.";
             }
         }
 
