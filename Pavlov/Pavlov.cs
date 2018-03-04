@@ -15,12 +15,13 @@ namespace Pavlov
         private int foodPrev = -1;
         private int changeRate = -1;
         private bool alarmPlayed = false;
-        private MenuItem alarmToggle;
-        private MenuItem trackingToggle;
         private bool repeatAlarm;
         private SoundPlayer player;
         //if false = trackingHomon
         private bool trackingPet;
+        private int foodAlarm;
+        Settings settings;
+
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
@@ -51,8 +52,7 @@ namespace Pavlov
         public Pavlov()
         {
             InitializeComponent();
-            repeatAlarm = GetAlarmRepeatBool();
-            trackingPet = GetTrackingBool();
+            SettingsUpdated();
             CreateContextMenu();
             StartPosition = FormStartPosition.Manual;
             SetWindowPos();
@@ -84,8 +84,7 @@ namespace Pavlov
                 ContextMenu = new ContextMenu(new[]
                 {
                     new MenuItem("Reset Window Position", ResetWindowPos),
-                    alarmToggle = new MenuItem($"Toggle Alarm Type (Current:{(GetAlarmRepeatBool()? "Repeat" : "Single")})", ToggleAlarmType),
-                    trackingToggle = new MenuItem($"Toggle Tracking Type (Current:{(GetTrackingBool()? "Pet" : "Homunculus")})", ToggleTackingType),
+                    new MenuItem("Settings", OpenSettings),
                     new MenuItem("-"),
                     new MenuItem("Exit Pavlov", ExitBtn_Click)
                 }),
@@ -94,21 +93,24 @@ namespace Pavlov
             };
         }
 
-        private void ToggleAlarmType(object sender, EventArgs e)
-        {
-            repeatAlarm = !repeatAlarm;
-            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+        private void OpenSettings(object sender, EventArgs e) {
+
+            if (settings == null || settings.IsDisposed)
             {
-                try
-                {
-                    key?.SetValue("alarmRepeat", repeatAlarm);
-                }
-                catch {/* If we cant write to the registry do nothing*/}
+                settings = new Settings();
+                settings.FormClosed += SettingsUpdated;
             }
-            alarmToggle.Text = $"Toggle Alarm Type (Current:{(repeatAlarm ? "Repeat" : "Single")})";
+            settings.Show();
         }
 
-        private bool GetAlarmRepeatBool()
+        private void SettingsUpdated(object sender = null, EventArgs e = null)
+        {
+            repeatAlarm = GetAlarmRepeatBool();
+            trackingPet = GetTrackingBool();
+            foodAlarm = GetFoodAlarm();
+        }
+
+        public static bool GetAlarmRepeatBool()
         {
             using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
             {
@@ -120,21 +122,7 @@ namespace Pavlov
             }
         }
 
-        private void ToggleTackingType(object sender, EventArgs e)
-        {
-            trackingPet = !trackingPet;
-            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
-            {
-                try
-                {
-                    key?.SetValue("trackPet", trackingPet);
-                }
-                catch {/* If we cant write to the registry do nothing*/}
-            }
-            trackingToggle.Text = $"Toggle Tracking Type (Current:{(GetTrackingBool() ? "Pet" : "Homunculus")})";
-        }
-
-        private bool GetTrackingBool()
+        public static bool GetTrackingBool()
         {
             using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
             {
@@ -143,6 +131,20 @@ namespace Pavlov
                     return Convert.ToBoolean(key?.GetValue("trackPet"));
                 }
                 catch { return true; }
+            }
+        }
+
+        public static int GetFoodAlarm()
+        {
+            using (var key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\ByTribe\Pavlov"))
+            {
+                try
+                {
+                    var foodAlarmLvl = Convert.ToInt32(key?.GetValue("foodAlarm"));
+                    if (foodAlarmLvl != 0) return foodAlarmLvl;
+                    return 25;
+                }
+                catch { return 25; }
             }
         }
 
@@ -220,7 +222,7 @@ namespace Pavlov
             var change = foodPrev - food;
             if (food > 0 && changeRate == -1 && foodPrev > food) changeRate = change;
             foodPrev = food;
-            if (food <= 25)
+            if (food <= foodAlarm)
             {
                 if (!alarmPlayed) PlayAlarm();
                 return "Feed me!";
@@ -230,7 +232,7 @@ namespace Pavlov
             {
                 if (change != 0)
                 {
-                    var x = (int)Math.Ceiling((food - 25m) / changeRate);
+                    var x = (int)Math.Ceiling((food - (decimal)foodAlarm) / changeRate);
                     dt = DateTime.Now.AddMinutes(x);
                 }
                 var ts = dt - DateTime.Now;
