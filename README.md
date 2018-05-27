@@ -1,7 +1,7 @@
 # Pavlov
 Pet and Homunculus tracker for iRo
 
-[Download link](https://github.com/miatribe/Pavlov/releases/download/0.2/Pavlov.zip)
+[Download link](https://github.com/miatribe/Pavlov/releases/download/0.3/Pavlov.zip)
 
 #### Must be ran as admin.
 
