@@ -1,4 +1,5 @@
 # Pavlov
+### This no longer works now that iRo is using EAC (project may be updated to work int he future)
 Pet and Homunculus tracker for iRo
 
 [Download link](https://github.com/miatribe/Pavlov/releases/download/0.3/Pavlov.zip)
